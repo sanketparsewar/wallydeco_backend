@@ -76,7 +76,7 @@ exports.login = async (req, res) => {
     // set cookies options
     const options = {
       httpOnly: false,
-      secure: true,
+      secure: false,
       sameSite: 'none',
     };
     res
@@ -113,7 +113,7 @@ exports.logout = async (req, res) => {
 
     const options = {
       httpOnly: false,
-      secure: true,
+      secure: false,
       sameSite: 'none',
     };
     res
