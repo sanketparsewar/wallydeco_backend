@@ -77,6 +77,7 @@ exports.login = async (req, res) => {
     const options = {
       httpOnly: false,
       secure: true,
+      sameSite: 'none',
     };
     res
       .status(200)
@@ -113,6 +114,7 @@ exports.logout = async (req, res) => {
     const options = {
       httpOnly: false,
       secure: true,
+      sameSite: 'none',
     };
     res
       .status(200)
