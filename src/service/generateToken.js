@@ -12,9 +12,3 @@ exports.generateAccessToken = async (employee) => {
     }
   );
 };
-
-exports.generateRefreshToken = async (employee) => {
-  return jwt.sign({ _id: employee._id }, process.env.REFRESH_TOKEN_SECRET_KEY, {
-    expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
-  });
-};

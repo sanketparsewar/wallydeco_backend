@@ -1,4 +1,3 @@
-// userRoutes.js
 const express = require("express");
 const router = express.Router();
 const {
@@ -13,10 +12,10 @@ const { updateUserValidation } = require("../utils/userValidation");
 
 
 router.get("/logged",verifyJwt, getLoggedUser);
-router.get("/:id",verifyJwt, getUserById);
-router.get("/",verifyJwt, getUsers);
+router.get("/", getUsers);
+router.get("/:id", getUserById);
 router.put("/:id",verifyJwt, validate(updateUserValidation), updateUser);
-router.delete("/:id",verifyJwt, deleteUser);
+router.delete("/:id", deleteUser);
 
 
 module.exports = router;

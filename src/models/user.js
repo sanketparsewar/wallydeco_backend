@@ -30,13 +30,11 @@ const userSchema = new mongoose.Schema(
       default:
         "https://res.cloudinary.com/dgcc3397p/image/upload/v1739263331/profile_picture3_bscksk.jpg",
     },
-    refreshToken: {
-      type: String,
-    },
+   
     favourite: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Wallpaper', // Replace 'Wallpaper' with the correct model if needed
+        ref: 'Wallpaper', 
       },
     ],
   },

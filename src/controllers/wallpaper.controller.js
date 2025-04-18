@@ -8,7 +8,7 @@ exports.addWallpaper = async (req, res) => {
     const savedWallpaper = await wallpaper.save();
     res.status(201).json(savedWallpaper);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ message: err.message });
   }
 };
 
@@ -52,7 +52,7 @@ exports.getWallpapers = async (req, res) => {
       wallpapers, // Paginated wallpapers
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -63,7 +63,7 @@ exports.getWallpapersByCategory = async (req, res) => {
     const wallpapers = await Wallpaper.find(category);
     res.status(200).json(wallpapers);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -76,23 +76,21 @@ exports.getWallpaperById = async (req, res) => {
       return res.status(404).json({ message: "Wallpaper not found" });
     res.status(200).json(wallpaper);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
 
 exports.getFavouriteWallpapers = async (req, res) => {
   try {
-    const userId = req.user.id; // Assuming user is authenticated and req.user is set by auth middleware
+    const userId = req.user._id; // Assuming user is authenticated and req.user is set by auth middleware
 
     const user = await User.findById(userId).populate('favourite');
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
     res.status(200).json({ favourites: user.favourite });
   } catch (error) {
-    console.error('Error fetching favourites:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -144,7 +142,7 @@ exports.updateWallpaper = async (req, res) => {
     if (!wallpaper) return res.status(404).json({ message: 'Wallpaper not found' });
     res.status(200).json(wallpaper);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ message: err.message });
   }
 };
 
@@ -158,6 +156,6 @@ exports.deleteWallpaper = async (req, res) => {
       return res.status(404).json({ message: "Wallpaper not found" });
     res.status(200).json({ message: "Wallpaper deleted successfully" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ message: err.message });
   }
 };

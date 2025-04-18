@@ -7,7 +7,7 @@ exports.createCoupon = async (req, res) => {
     await coupon.save()
     res.status(201).json(coupon)
   } catch (error) {
-    res.status(400).json({ error: error.message })
+    res.status(400).json({ message: error.message })
   }
 }
 
@@ -16,7 +16,7 @@ exports.getCoupons = async (req, res) => {
     const coupons = await Coupon.find()
     res.status(200).json(coupons)
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    res.status(500).json({ message: error.message })
   }
 }
 
@@ -26,7 +26,7 @@ exports.getCouponById = async (req, res) => {
     if (!coupon) return res.status(404).json({ message: 'Coupon not found' })
     res.status(200).json(coupon)
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    res.status(500).json({ message: error.message })
   }
 }
 
@@ -36,7 +36,7 @@ exports.updateCoupon = async (req, res) => {
     if (!coupon) return res.status(404).json({ message: 'Coupon not found' })
     res.status(200).json(coupon)
   } catch (error) {
-    res.status(400).json({ error: error.message })
+    res.status(400).json({ message: error.message })
   }
 }
 
@@ -46,7 +46,7 @@ exports.deleteCoupon = async (req, res) => {
     if (!coupon) return res.status(404).json({ message: 'Coupon not found' })
     res.status(200).json({ message: 'Coupon deleted successfully' })
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    res.status(500).json({ message: error.message })
   }
 }
 
@@ -81,17 +81,10 @@ exports.applyCoupon = async (req, res) => {
       return res.status(400).json({ message: "You have already used this coupon." });
     }
 
-    // // Log usage
-    // await UsedCoupon.create({ user, couponCode });
-
-    // // Increment coupon usage count
-    // coupon.usedCount = (coupon.usedCount || 0) + 1;
-    // await coupon.save();
-
     // Send full coupon object (for discount, description, validity, etc.)
     return res.status(200).json({ success: true, coupon });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };

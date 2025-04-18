@@ -73,7 +73,7 @@ exports.placeOrder = async (req, res) => {
     res.status(201).json({ message: 'Order created successfully', savedOrder });
   } catch (err) {
     await session.abortTransaction();
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ message: err.message });
   } finally {
     session.endSession();
   }
@@ -90,7 +90,7 @@ exports.updateOrderStatus = async (req, res) => {
     if (!order) return res.status(404).json({ message: "Order not found" });
     res.status(200).json(order);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ message: err.message });
   }
 };
 
@@ -101,7 +101,7 @@ exports.getAllOrders = async (req, res) => {
       .populate("items.wallpaper");
     res.status(200).json(orders);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -113,7 +113,7 @@ exports.getOrderById = async (req, res) => {
     if (!order) return res.status(404).json({ message: "Order not found" });
     res.status(200).json(order);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -124,6 +124,6 @@ exports.deleteOrder = async (req, res) => {
     if (!order) return res.status(404).json({ message: "Order not found" });
     res.status(200).json({ message: "Order deleted successfully" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ message: err.message });
   }
 };

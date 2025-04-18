@@ -18,7 +18,6 @@ router.post("/", upload.single("file"), async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error uploading to Cloudinary:", error);
     res.status(500).json({ message: "Error uploading file" });
   }
 });
