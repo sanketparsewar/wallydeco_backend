@@ -94,6 +94,17 @@ exports.updateOrderStatus = async (req, res) => {
   }
 };
 
+exports.getUserOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user._id }).populate('items.wallpaper');
+    if (!orders) return res.status(404).json({ message: "No orders found" });
+    res.status(200).json(orders);
+    
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 exports.getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()

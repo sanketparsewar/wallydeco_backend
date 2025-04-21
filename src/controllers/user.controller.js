@@ -3,7 +3,7 @@ const User = require("../models/user");
 exports.getLoggedUser = async (req, res) => {
   try {
     const user = req.user;
-    res.status(200).json(user);
+    res.status(200).json({user:user});
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
