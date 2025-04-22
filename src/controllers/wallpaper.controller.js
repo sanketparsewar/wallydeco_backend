@@ -1,8 +1,7 @@
 const Wallpaper = require("../models/wallpaper");
 const User=require("../models/user")
-// Create a new wallpaper
+
 exports.addWallpaper = async (req, res) => {
-  
   try {
     const wallpaper = new Wallpaper(req.body);
     const savedWallpaper = await wallpaper.save();
@@ -12,7 +11,6 @@ exports.addWallpaper = async (req, res) => {
   }
 };
 
-// Get all wallpapers
 exports.getWallpapers = async (req, res) => {
   try {
     const { search, category, price, stock, page = 1, limit = 10 } = req.query;
@@ -61,6 +59,9 @@ exports.getWallpapersByCategory = async (req, res) => {
   try {
     const category=req.params
     const wallpapers = await Wallpaper.find(category);
+    if (!wallpapers || wallpapers.length === 0) {
+      return res.status(404).json({ message: "No wallpapers found in this category" });
+    }
     res.status(200).json(wallpapers);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -100,10 +101,10 @@ exports.getFavouriteWallpapers = async (req, res) => {
 exports.addWallpaperToFavourite = async (req, res) => {
   try {
     const userId = req.user.id;
-    const  wallpaperId  = req.params.id;
+    const  id  = req.params.id;
 
     // Check if wallpaper exists
-    const wallpaper = await Wallpaper.findById(wallpaperId);
+    const wallpaper = await Wallpaper.findById(id);
     if (!wallpaper) {
       return res.status(404).json({ message: 'Wallpaper not found' });
     }
@@ -114,14 +115,14 @@ exports.addWallpaperToFavourite = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const isFavourite = user.favourite.includes(wallpaperId);
+    const isFavourite = user.favourite.includes(id);
 
     if (isFavourite) {
       // Remove from favourites
-      user.favourite = user.favourite.filter(id => id.toString() !== wallpaperId);
+      user.favourite = user.favourite.filter(id => id.toString() !== id);
     } else {
       // Add to favourites
-      user.favourite.push(wallpaperId);
+      user.favourite.push(id);
     }
 
     await user.save();
