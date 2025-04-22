@@ -1,5 +1,5 @@
 const Wallpaper = require("../models/wallpaper");
-const User=require("../models/user")
+const User = require("../models/user")
 
 exports.addWallpaper = async (req, res) => {
   try {
@@ -57,7 +57,7 @@ exports.getWallpapers = async (req, res) => {
 
 exports.getWallpapersByCategory = async (req, res) => {
   try {
-    const category=req.params
+    const category = req.params
     const wallpapers = await Wallpaper.find(category);
     if (!wallpapers || wallpapers.length === 0) {
       return res.status(404).json({ message: "No wallpapers found in this category" });
@@ -101,8 +101,8 @@ exports.getFavouriteWallpapers = async (req, res) => {
 exports.addWallpaperToFavourite = async (req, res) => {
   try {
     const userId = req.user.id;
-    const  id  = req.params.id;
-
+    const id = req.params.id;
+    console.log(userId, id);
     // Check if wallpaper exists
     const wallpaper = await Wallpaper.findById(id);
     if (!wallpaper) {
@@ -119,7 +119,7 @@ exports.addWallpaperToFavourite = async (req, res) => {
 
     if (isFavourite) {
       // Remove from favourites
-      user.favourite = user.favourite.filter(id => id.toString() !== id);
+      user.favourite = user.favourite.filter(favId => favId.toString() !== id);
     } else {
       // Add to favourites
       user.favourite.push(id);
