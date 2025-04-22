@@ -79,6 +79,55 @@ exports.placeOrder = async (req, res) => {
   }
 };
 
+exports.cancelOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId).populate("user")
+    .populate("items.wallpaper");
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    if (order.status === 'Delivered') {
+      return res.status(400).json({ message: 'Delivered orders cannot be cancelled' });
+    }
+    if (order.status === 'Cancelled') {
+      return res.status(400).json({ message: 'Order is already cancelled' });
+    }
+
+    order.status = 'Cancelled';
+    await order.save();
+
+    res.status(200).json({ message: 'Order cancelled successfully', order });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// Mark Order as Delivered
+exports.markAsDelivered = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId).populate("user")
+    .populate("items.wallpaper");
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    if (order.status === 'Delivered') {
+      return res.status(400).json({ message: 'Order is already marked as delivered' });
+    }
+    if (order.status === 'Cancelled') {
+      return res.status(400).json({ message: 'Cancelled orders cannot be marked as delivered' });
+    }
+    order.status = 'Delivered';
+    order.deliveryDate = new Date();
+    await order.save();
+
+    res.status(200).json({ message: 'Order marked as delivered', order });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
 
 exports.updateOrderStatus = async (req, res) => {
   try {
@@ -96,7 +145,7 @@ exports.updateOrderStatus = async (req, res) => {
 
 exports.getUserOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user._id }).populate('items.wallpaper');
+    const orders = await Order.find({ user: req.user._id }).populate('items.wallpaper').sort({ orderDate: -1 });
     if (!orders) return res.status(404).json({ message: "No orders found" });
     res.status(200).json(orders);
     
@@ -109,7 +158,7 @@ exports.getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
       .populate("user")
-      .populate("items.wallpaper");
+      .populate("items.wallpaper").sort({ orderDate: -1 });
     res.status(200).json(orders);
   } catch (err) {
     res.status(500).json({ message: err.message });
