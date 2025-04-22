@@ -7,6 +7,7 @@ const app = express();
 
 // Routes
 const authRoutes = require("./routes/auth.routes");
+const categoryRoutes = require("./routes/category.routes");
 const wallpaperRoutes = require("./routes/wallpaper.routes");
 const couponRoutes = require("./routes/coupon.routes");
 const userRoutes = require("./routes/user.routes");
@@ -33,6 +34,7 @@ app.use(
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/category", categoryRoutes);
 app.use("/api/wallpaper", wallpaperRoutes);
 app.use("/api/coupon", couponRoutes);
 app.use("/api/user", userRoutes);
