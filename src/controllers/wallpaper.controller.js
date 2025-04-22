@@ -102,7 +102,6 @@ exports.addWallpaperToFavourite = async (req, res) => {
   try {
     const userId = req.user.id;
     const id = req.params.id;
-    console.log(userId, id);
     // Check if wallpaper exists
     const wallpaper = await Wallpaper.findById(id);
     if (!wallpaper) {
