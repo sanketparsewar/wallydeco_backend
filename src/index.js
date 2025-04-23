@@ -8,10 +8,12 @@ const app = express();
 // Routes
 const authRoutes = require("./routes/auth.routes");
 const categoryRoutes = require("./routes/category.routes");
+const cityRoutes = require("./routes/city.routes");
 const wallpaperRoutes = require("./routes/wallpaper.routes");
 const couponRoutes = require("./routes/coupon.routes");
 const userRoutes = require("./routes/user.routes");
 const orderRoutes = require("./routes/order.routes");
+const dashboardRoutes= require("./routes/dashboard.routes");
 const cloudinaryRoutes = require("./routes/cloudinary.routes");
 
 
@@ -35,10 +37,12 @@ app.use(
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/category", categoryRoutes);
+app.use("/api/city", cityRoutes);
 app.use("/api/wallpaper", wallpaperRoutes);
 app.use("/api/coupon", couponRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/order", orderRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/upload", cloudinaryRoutes);
 
 module.exports = app;
