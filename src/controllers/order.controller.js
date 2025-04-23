@@ -2,6 +2,7 @@ const Order = require("../models/order");
 const Wallpaper = require('../models/wallpaper'); // Import the Wallpaper model
 const UsedCoupon = require("../models/usedCoupon");
 const Coupon = require('../models/coupon')
+const User = require("../models/user");
 const mongoose = require('mongoose')
 
 exports.placeOrder = async (req, res) => {
@@ -83,12 +84,12 @@ exports.cancelOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
     const order = await Order.findById(orderId).populate("user")
-    .populate("items.wallpaper");
+      .populate("items.wallpaper");
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
-    if (order.status === 'Delivered') {
-      return res.status(400).json({ message: 'Delivered orders cannot be cancelled' });
+    if (order.status === 'Delivered' || order.status === 'Shipped') {
+      return res.status(400).json({ message: 'Order cannot be cancelled' });
     }
     if (order.status === 'Cancelled') {
       return res.status(400).json({ message: 'Order is already cancelled' });
@@ -104,39 +105,53 @@ exports.cancelOrder = async (req, res) => {
 };
 
 // Mark Order as Delivered
-exports.markAsDelivered = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const order = await Order.findById(orderId).populate("user")
-    .populate("items.wallpaper");
-    if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
-    }
-    if (order.status === 'Delivered') {
-      return res.status(400).json({ message: 'Order is already marked as delivered' });
-    }
-    if (order.status === 'Cancelled') {
-      return res.status(400).json({ message: 'Cancelled orders cannot be marked as delivered' });
-    }
-    order.status = 'Delivered';
-    order.deliveryDate = new Date();
-    await order.save();
+// exports.markAsDelivered = async (req, res) => {
+//   try {
+//     const { orderId } = req.params;
+//     const order = await Order.findById(orderId).populate("user")
+//       .populate("items.wallpaper");
+//     if (!order) {
+//       return res.status(404).json({ message: 'Order not found' });
+//     }
+//     if (order.status === 'Delivered' || order.status === 'Shipped') {
+//       return res.status(400).json({ message: 'Order cannot be cancelled' });
+//     }
+//     if (order.status === 'Cancelled') {
+//       return res.status(400).json({ message: 'Cancelled orders cannot be marked as delivered' });
+//     }
+//     order.status = 'Delivered';
+//     order.deliveryDate = new Date();
+//     await order.save();
 
-    res.status(200).json({ message: 'Order marked as delivered', order });
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
-  }
-};
+//     res.status(200).json({ message: 'Order marked as delivered', order });
+//   } catch (error) {
+//     res.status(500).json({ message: 'Server Error' });
+//   }
+// };
 
 
 exports.updateOrderStatus = async (req, res) => {
   try {
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status: req.body.status },
-      { new: true }
-    );
-    if (!order) return res.status(404).json({ message: "Order not found" });
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId).populate("user")
+      .populate("items.wallpaper");
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    if (order.status === 'Pending') {
+      order.status = 'Shipped';
+    }
+    else if (order.status === 'Shipped') {
+      order.status = 'Delivered';
+      order.deliveryDate = new Date();
+    }
+    else if (order.status === 'Delivered') {
+      return res.status(400).json({ message: 'Order already delivered' });
+    }
+    else if (order.status === 'Cancelled') {
+      return res.status(400).json({ message: 'Order already Cancelled' });
+    }
+    await order.save();
     res.status(200).json(order);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -148,22 +163,95 @@ exports.getUserOrders = async (req, res) => {
     const orders = await Order.find({ user: req.user._id }).populate('items.wallpaper').sort({ orderDate: -1 });
     if (!orders) return res.status(404).json({ message: "No orders found" });
     res.status(200).json(orders);
-    
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
 exports.getAllOrders = async (req, res) => {
-  try {
-    const orders = await Order.find()
-      .populate("user")
-      .populate("items.wallpaper").sort({ orderDate: -1 });
-    res.status(200).json(orders);
+    try {
+    const { search, city, page = 1, limit = 10 } = req.query;
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.max(1, Number(limit));
+    const skip = (pageNum - 1) * limitNum;
+    const pipeline = [];
+    // Lookup user (to access user.name)
+    pipeline.push({
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "user"
+      }
+    });
+
+    pipeline.push({ $unwind: "$user" });
+
+    // Lookup wallpapers
+    pipeline.push({
+      $lookup: {
+        from: "wallpapers",
+        localField: "items.wallpaper",
+        foreignField: "_id",
+        as: "items.wallpaper"
+      }
+    });
+
+    // Filtering by search and city
+    const matchStage = { $and: [] };
+
+    if (search) {
+      const regex = new RegExp(search, "i");
+      const orConditions = [
+        { "user.name": { $regex: regex } },
+        { address: { $regex: regex } }
+      ];
+
+      if (mongoose.Types.ObjectId.isValid(search)) {
+        orConditions.push({ _id: new mongoose.Types.ObjectId(search) });
+      }
+
+      matchStage.$and.push({ $or: orConditions });
+    }
+
+    if (city) {
+      matchStage.$and.push({
+        "shippingAddress.city": city
+      });
+    }
+
+    if (matchStage.$and.length > 0) {
+      pipeline.push({ $match: matchStage });
+    }
+
+    // Total count for pagination
+    const countPipeline = [...pipeline, { $count: "total" }];
+    const countResult = await Order.aggregate(countPipeline);
+    const total = countResult[0]?.total || 0;
+
+    // Pagination
+    pipeline.push(
+      { $sort: { orderDate: -1 } },
+      { $skip: skip },
+      { $limit: limitNum }
+    );
+
+    const orders = await Order.aggregate(pipeline);
+
+    res.status(200).json({
+      total,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.ceil(total / limitNum),
+      orders
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
+
 
 exports.getOrderById = async (req, res) => {
   try {
