@@ -104,31 +104,6 @@ exports.cancelOrder = async (req, res) => {
   }
 };
 
-// Mark Order as Delivered
-// exports.markAsDelivered = async (req, res) => {
-//   try {
-//     const { orderId } = req.params;
-//     const order = await Order.findById(orderId).populate("user")
-//       .populate("items.wallpaper");
-//     if (!order) {
-//       return res.status(404).json({ message: 'Order not found' });
-//     }
-//     if (order.status === 'Delivered' || order.status === 'Shipped') {
-//       return res.status(400).json({ message: 'Order cannot be cancelled' });
-//     }
-//     if (order.status === 'Cancelled') {
-//       return res.status(400).json({ message: 'Cancelled orders cannot be marked as delivered' });
-//     }
-//     order.status = 'Delivered';
-//     order.deliveryDate = new Date();
-//     await order.save();
-
-//     res.status(200).json({ message: 'Order marked as delivered', order });
-//   } catch (error) {
-//     res.status(500).json({ message: 'Server Error' });
-//   }
-// };
-
 
 exports.updateOrderStatus = async (req, res) => {
   try {
