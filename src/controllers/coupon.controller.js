@@ -14,7 +14,7 @@ exports.createCoupon = async (req, res) => {
 exports.getCoupons = async (req, res) => {
   try {
     const coupons = await Coupon.find()
-    res.status(200).json(coupons)
+    res.status(200).json({coupons})
   } catch (error) {
     res.status(500).json({ message: error.message })
   }

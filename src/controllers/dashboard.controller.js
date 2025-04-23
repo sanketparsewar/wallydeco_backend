@@ -10,6 +10,8 @@ const City = require("../models/city");
 exports.getDashboardData = async (req, res) => {
     try {
         const totalCoupons = await Coupon.countDocuments();
+        const totalActiveCoupons = await Coupon.countDocuments({active: true});
+        const totalInactiveCoupons = await Coupon.countDocuments({active: false});
         const totalUsedCoupons = await UsedCoupon.countDocuments();
         const totalCities = await City.countDocuments();
         const totalCategories = await Category.countDocuments();
@@ -61,6 +63,8 @@ exports.getDashboardData = async (req, res) => {
             totalShippedOrders,
             totalPendingOrders,
             totalUsers,
+            totalActiveCoupons,
+            totalInactiveCoupons,
             totalCategories
         });
     } catch (err) {
