@@ -59,7 +59,7 @@ exports.placeOrder = async (req, res) => {
     }
 
     if (req.body.couponCode) {
-      const coupon = await Coupon.findOne({ code: req.body.couponCode.trim().toUpperCase(), active: true });
+      const coupon = await Coupon.findOne({ code: req.body.couponCode.trim().toUpperCase(), isActive: true });
 
       // Log usage
       await UsedCoupon.create({ user: req.body.user, couponCode: req.body.couponCode });

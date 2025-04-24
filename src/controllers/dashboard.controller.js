@@ -10,8 +10,8 @@ const City = require("../models/city");
 exports.getDashboardData = async (req, res) => {
     try {
         const totalCoupons = await Coupon.countDocuments();
-        const totalActiveCoupons = await Coupon.countDocuments({active: true});
-        const totalInactiveCoupons = await Coupon.countDocuments({active: false});
+        const totalActiveCoupons = await Coupon.countDocuments({isActive: true});
+        const totalInactiveCoupons = await Coupon.countDocuments({isActive: false});
         const totalUsedCoupons = await UsedCoupon.countDocuments();
         const totalCities = await City.countDocuments();
         const totalCategories = await Category.countDocuments();

@@ -2,25 +2,25 @@ const City = require('../models/city');
 
 exports.addCity = async (req, res) => {
     try {
-      let { name, state } = req.body;
+      let { cityName, state } = req.body;
   
-      if (!name || !state) {
-        return res.status(400).json({ message: 'City name and state are required' });
+      if (!cityName || !state) {
+        return res.status(400).json({ message: 'City Name and state are required' });
       }
   
-      // Format city name: Capitalize first letter
-      name=name.trim();
-      name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+      // Format city cityName: Capitalize first letter
+      cityName=cityName.trim();
+      cityName = cityName.charAt(0).toUpperCase() + cityName.slice(1).toLowerCase();
       // Format state: All uppercase
       state = state.trim();
       state = state.toUpperCase();
   
-      const existingCity = await City.findOne({ name });
+      const existingCity = await City.findOne({ cityName });
       if (existingCity) {
         return res.status(400).json({ message: 'City already exists' });
       }
   
-      const city = new City({ name, state });
+      const city = new City({ cityName, state });
       const savedCity = await city.save();
       res.status(201).json(savedCity);
     } catch (err) {
@@ -31,7 +31,7 @@ exports.addCity = async (req, res) => {
 // Get all cities
 exports.getAllCities = async (req, res) => {
     try {
-        const cities = await City.find().sort({ name: 1 });
+        const cities = await City.find().sort({ cityName: 1 });
         res.status(200).json({cities});
     } catch (err) {
         res.status(500).json({ message: err.message });
