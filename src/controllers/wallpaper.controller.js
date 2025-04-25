@@ -1,9 +1,15 @@
 const Wallpaper = require("../models/wallpaper");
 const User = require("../models/user")
+const { capitalizeFirst, upperCase } = require('../utils/stringTransform')
+
 
 exports.addWallpaper = async (req, res) => {
   try {
-    const wallpaper = new Wallpaper(req.body);
+    let { wallpaperId, title } = req.body
+    title = capitalizeFirst(title.trim())
+    wallpaperId = upperCase(wallpaperId.trim())
+
+    const wallpaper = new Wallpaper({ ...req.body, wallpaperId, title });
     const savedWallpaper = await wallpaper.save();
     res.status(201).json(savedWallpaper);
   } catch (err) {
@@ -40,7 +46,7 @@ exports.getWallpapers = async (req, res) => {
     // Fetch paginated wallpapers
     const wallpapers = await Wallpaper.find(filter)
       .skip(skip)
-      .limit(limitNum);
+      .limit(limitNum).sort({ title: 1 }).select('-__v');
 
     res.status(200).json({
       total, // Total number of wallpapers (without pagination)
@@ -58,7 +64,7 @@ exports.getWallpapers = async (req, res) => {
 exports.getWallpapersByCategory = async (req, res) => {
   try {
     const category = req.params
-    const wallpapers = await Wallpaper.find(category);
+    const wallpapers = await Wallpaper.find(category).select('-__v');
     if (!wallpapers || wallpapers.length === 0) {
       return res.status(404).json({ message: "No wallpapers found in this category" });
     }
@@ -72,7 +78,7 @@ exports.getWallpapersByCategory = async (req, res) => {
 // Get a wallpaper by ID
 exports.getWallpaperById = async (req, res) => {
   try {
-    const wallpaper = await Wallpaper.findById(req.params.id);
+    const wallpaper = await Wallpaper.findById(req.params.id).select('-__v');
     if (!wallpaper)
       return res.status(404).json({ message: "Wallpaper not found" });
     res.status(200).json(wallpaper);
@@ -85,7 +91,7 @@ exports.getFavouriteWallpapers = async (req, res) => {
   try {
     const userId = req.user._id; // Assuming user is authenticated and req.user is set by auth middleware
 
-    const user = await User.findById(userId).populate('favourite');
+    const user = await User.findById(userId).populate('favourite').select('-__v');
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -103,7 +109,7 @@ exports.addWallpaperToFavourite = async (req, res) => {
     const userId = req.user.id;
     const id = req.params.id;
     // Check if wallpaper exists
-    const wallpaper = await Wallpaper.findById(id);
+    const wallpaper = await Wallpaper.findById(id).select('-__v');
     if (!wallpaper) {
       return res.status(404).json({ message: 'Wallpaper not found' });
     }
@@ -138,7 +144,12 @@ exports.addWallpaperToFavourite = async (req, res) => {
 
 exports.updateWallpaper = async (req, res) => {
   try {
-    const wallpaper = await Wallpaper.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    let { wallpaperId, title } = req.body
+    console.log(wallpaperId)
+    title = capitalizeFirst(title.trim())
+    wallpaperId = upperCase(wallpaperId.trim())
+
+    const wallpaper = await Wallpaper.findByIdAndUpdate(req.params.id, { ...req.body, wallpaperId:wallpaperId, title:title }, { new: true }).select('-__v');
     if (!wallpaper) return res.status(404).json({ message: 'Wallpaper not found' });
     res.status(200).json(wallpaper);
   } catch (err) {

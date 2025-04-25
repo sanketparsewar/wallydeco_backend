@@ -21,6 +21,7 @@ router.get("/favourite/:id", verifyJwt, addWallpaperToFavourite);
 router.get("/:id", getWallpaperById);
 router.post("/", verifyJwt, validate(WallpaperValidation), addWallpaper);
 router.put("/:id", verifyJwt, validate(WallpaperValidation), updateWallpaper);
+// router.put("/:id", verifyJwt, updateWallpaper);
 router.delete("/:id", verifyJwt, deleteWallpaper);
 
 module.exports = router;
