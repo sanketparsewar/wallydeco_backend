@@ -1,10 +1,12 @@
 const Coupon = require('../models/coupon')
 const UsedCoupon = require("../models/usedCoupon");
+const { capitalizeFirst, upperCase } = require('../utils/stringTransform')
+
 
 exports.createCoupon = async (req, res) => {
   try {
-    const coupon = new Coupon(req.body)
-    coupon.code = coupon.code.trim().toUpperCase()
+    let coupon = new Coupon(req.body)
+    coupon.code=upperCase(coupon.code.trim())
     coupon.startDate = new Date(coupon.startDate)
     coupon.endDate = new Date(coupon.endDate)
     if (coupon.startDate >= coupon.endDate) {
@@ -48,9 +50,11 @@ exports.getCouponById = async (req, res) => {
 
 exports.updateCoupon = async (req, res) => {
   try {
-    const coupon = await Coupon.findByIdAndUpdate(req.params.id, req.body, { new: true })
-    if (!coupon) return res.status(404).json({ message: 'Coupon not found' })
-    res.status(200).json(coupon)
+    let coupon=req.body
+    coupon.code=upperCase(coupon.code.trim())
+    const gotCoupon = await Coupon.findByIdAndUpdate(req.params.id, {...req.body,code:coupon.code}, { new: true })
+    if (!gotCoupon) return res.status(404).json({ message: 'Coupon not found' })
+    res.status(200).json(gotCoupon)
   } catch (error) {
     res.status(400).json({ message: error.message })
   }

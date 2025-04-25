@@ -1,4 +1,6 @@
 const Category = require('../models/category');
+const { capitalizeFirst, upperCase } = require('../utils/stringTransform')
+
 
 exports.createCategory = async (req, res) => {
     try {
@@ -7,8 +9,8 @@ exports.createCategory = async (req, res) => {
             return res.status(400).json({ message: "Category name is required" });
         }
         // Format name: Capitalize first letter
-        name = name.trim();
-        name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+        name=capitalizeFirst(name.trim())
+
         const existingCategory = await Category.findOne({ name });
         if (existingCategory) {
             return res.status(400).json({ message: "Category already exists" });
@@ -29,6 +31,7 @@ exports.getAllCategories = async (req, res) => {
         return res.status(500).json({ message: "Server error", error: error.message });
     }
 }
+
 exports.getCategoryById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -44,10 +47,12 @@ exports.getCategoryById = async (req, res) => {
 exports.updateCategory = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name } = req.body;
+        let { name } = req.body;
         if (!name) {
             return res.status(400).json({ message: "Category name is required" });
         }
+        name=capitalizeFirst(name.trim())
+        
         const category = await Category.findByIdAndUpdate(id, { name }, { new: true });
         if (!category) {
             return res.status(404).json({ message: "Category not found" });

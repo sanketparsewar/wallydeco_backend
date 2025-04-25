@@ -10,8 +10,8 @@ const City = require("../models/city");
 exports.getDashboardData = async (req, res) => {
     try {
         const totalCoupons = await Coupon.countDocuments();
-        const totalActiveCoupons = await Coupon.countDocuments({isActive: true});
-        const totalInactiveCoupons = await Coupon.countDocuments({isActive: false});
+        const totalActiveCoupons = await Coupon.countDocuments({ isActive: true });
+        const totalInactiveCoupons = await Coupon.countDocuments({ isActive: false });
         const totalUsedCoupons = await UsedCoupon.countDocuments();
         const totalCities = await City.countDocuments();
         const totalCategories = await Category.countDocuments();
@@ -35,6 +35,9 @@ exports.getDashboardData = async (req, res) => {
 
         const totalOrders = await Order.countDocuments();
         const totalCancelledOrders = await Order.countDocuments({ status: "Cancelled" });
+        const totalUpiOrders = await Order.countDocuments({ paymentMethod: "upi" });
+        const totalPaidOrders = await Order.countDocuments({ paymentStatus: "paid" });
+        const totalCodOrders = await Order.countDocuments({ paymentMethod: "cod" });
         const totalDeliveredOrders = await Order.countDocuments({ status: "Delivered" });
         const totalShippedOrders = await Order.countDocuments({ status: "Shipped" });
         const totalPendingOrders = await Order.countDocuments({ status: "Pending" });
@@ -42,9 +45,27 @@ exports.getDashboardData = async (req, res) => {
 
         const totalSales = await Order.aggregate([
             {
+                $match: {
+                    paymentStatus: 'paid'
+                }
+            },
+            {
                 $group: {
                     _id: null,
                     totalSales: { $sum: "$finalAmount" }
+                }
+            }
+        ]);
+        const totalUnpaidAmount = await Order.aggregate([
+            {
+                $match: {
+                    paymentStatus: 'unpaid'
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalUnpaidAmount: { $sum: "$finalAmount" }
                 }
             }
         ]);
@@ -62,10 +83,14 @@ exports.getDashboardData = async (req, res) => {
             totalDeliveredOrders,
             totalShippedOrders,
             totalPendingOrders,
-            totalUsers,
             totalActiveCoupons,
             totalInactiveCoupons,
-            totalCategories
+            totalCategories,
+            totalUsers,
+            totalUnpaidAmount:totalUnpaidAmount[0] ? totalUnpaidAmount[0].totalUnpaidAmount : 0,
+            totalUpiOrders,
+            totalCodOrders,
+            totalPaidOrders
         });
     } catch (err) {
         res.status(500).json({ message: err.message });

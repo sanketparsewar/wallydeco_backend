@@ -1,38 +1,36 @@
 const City = require('../models/city');
-
+const { capitalizeFirst, upperCase } = require('../utils/stringTransform')
 exports.addCity = async (req, res) => {
     try {
-      let { cityName, state } = req.body;
-  
-      if (!cityName || !state) {
-        return res.status(400).json({ message: 'City Name and state are required' });
-      }
-  
-      // Format city cityName: Capitalize first letter
-      cityName=cityName.trim();
-      cityName = cityName.charAt(0).toUpperCase() + cityName.slice(1).toLowerCase();
-      // Format state: All uppercase
-      state = state.trim();
-      state = state.toUpperCase();
-  
-      const existingCity = await City.findOne({ cityName });
-      if (existingCity) {
-        return res.status(400).json({ message: 'City already exists' });
-      }
-  
-      const city = new City({ cityName, state });
-      const savedCity = await city.save();
-      res.status(201).json(savedCity);
+        let { cityName, state } = req.body;
+
+        if (!cityName || !state) {
+            return res.status(400).json({ message: 'City Name and state are required' });
+        }
+
+        // Format city cityName: Capitalize first letter
+        cityName = capitalizeFirst(cityName.trim())
+        // Format state: All uppercase
+        state = upperCase(state.trim())
+
+        const existingCity = await City.findOne({ cityName });
+        if (existingCity) {
+            return res.status(400).json({ message: 'City already exists' });
+        }
+
+        const city = new City({ cityName, state });
+        const savedCity = await city.save();
+        res.status(201).json(savedCity);
     } catch (err) {
-      res.status(400).json({ message: err.message });
+        res.status(400).json({ message: err.message });
     }
-  };
-  
+};
+
 // Get all cities
 exports.getAllCities = async (req, res) => {
     try {
         const cities = await City.find().sort({ cityName: 1 });
-        res.status(200).json({cities});
+        res.status(200).json({ cities });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -50,7 +48,11 @@ exports.getCityById = async (req, res) => {
 // Update a city
 exports.updateCity = async (req, res) => {
     try {
-        const city = await City.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        let { cityName, state } = req.body
+        cityName = capitalizeFirst(cityName.trim())
+        // Format state: All uppercase
+        state = upperCase(state.trim())
+        const city = await City.findByIdAndUpdate(req.params.id, { cityName: cityName, state: state }, { new: true });
         if (!city) return res.status(404).json({ message: 'City not found' });
         res.status(200).json(city);
     }
