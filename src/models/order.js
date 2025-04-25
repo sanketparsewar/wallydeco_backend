@@ -33,7 +33,12 @@ const orderSchema = new mongoose.Schema({
   paymentMethod: {
     type: String,
     enum: ["cod", "upi", "card"],
-    required: true
+    required: true,
+  },
+  paymentStatus:{
+    type:String,
+    enum:["paid","unpaid","refund"],
+    default:"unpaid"
   },
   upiId: {
     type: String,

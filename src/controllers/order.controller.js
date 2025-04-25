@@ -27,6 +27,11 @@ exports.placeOrder = async (req, res) => {
       }
     }
 
+    let payStatus = ''
+    if (req.body.paymentMethod == "upi" || req.body.paymentMethod == "card") {
+      payStatus = 'paid'
+    }
+
     // Create order
     const order = new Order({
       user: req.body.user,
@@ -38,7 +43,8 @@ exports.placeOrder = async (req, res) => {
       finalAmount: req.body.finalAmount,
       shippingAddress: req.body.shippingAddress,
       paymentMethod: req.body.paymentMethod,
-      upiId: req.body.upiId
+      upiId: req.body.upiId,
+      paymentStatus: payStatus || 'unpaid'
     });
 
     // Save order
@@ -96,13 +102,66 @@ exports.cancelOrder = async (req, res) => {
     }
 
     order.status = 'Cancelled';
+    order.paymentStatus = 'refund';
+
     await order.save();
 
     res.status(200).json({ message: 'Order cancelled successfully', order });
   } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: error.message });
   }
 };
+
+exports.markAsShipped = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId).populate('user').populate('items.wallpaper')
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    if (order.status === 'Shipped' || order.status === 'Delivered') {
+      return res.status(400).json({ message: 'Order already Shipped' });
+    }
+    else if (order.status === 'Cancelled') {
+      return res.status(400).json({ message: 'Order already Cancelled' });
+    }
+    order.status = 'Shipped';
+    await order.save();
+    res.status(200).json({ order, message: "Order Shipped" });
+
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+}
+
+exports.markAsDelivered = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId).populate('user').populate('items.wallpaper')
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    if (order.status === 'Delivered') {
+      return res.status(400).json({ message: 'Order already delivered' });
+    }
+    else if (order.status === 'Cancelled') {
+      return res.status(400).json({ message: 'Order already Cancelled' });
+    }
+    
+    order.status = 'Delivered';
+    order.deliveryDate = new Date();
+    order.paymentStatus = 'paid';
+    await order.save();
+    res.status(200).json({ order, message: "Order Delivered" });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+}
+
+
+
+
 
 
 exports.updateOrderStatus = async (req, res) => {
@@ -145,7 +204,7 @@ exports.getUserOrders = async (req, res) => {
 };
 
 exports.getAllOrders = async (req, res) => {
-    try {
+  try {
     const { search, city, page = 1, limit = 10 } = req.query;
     const pageNum = Math.max(1, Number(page));
     const limitNum = Math.max(1, Number(limit));
