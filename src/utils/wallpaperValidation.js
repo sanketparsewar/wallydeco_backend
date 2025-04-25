@@ -2,6 +2,12 @@ const Joi = require("joi");
 
 // Joi schema for creating a new wallpaper
 exports.WallpaperValidation = Joi.object({
+  wallpaperId: Joi.string().min(2).max(100).required().messages({
+    "string.empty": "WallpaperId is required.",
+    "string.min": "WallpaperId must be at least 2 characters long.",
+    "string.max": "WallpaperId cannot exceed 100 characters.",
+    "any.required": "WallpaperId is required.",
+  }),
   title: Joi.string().min(2).max(100).required().messages({
     "string.empty": "Title is required.",
     "string.min": "Title must be at least 2 characters long.",
@@ -40,8 +46,14 @@ exports.WallpaperValidation = Joi.object({
     "array.base": "Images must be an array of valid URLs.",
     "string.uri": "Each image must be a valid URL.",
   }),
+  _id: Joi.string().optional(),
+  createdAt: Joi.string().optional(),
+  updatedAt: Joi.string().optional(),
+  sold: Joi.number().optional(),
+
 });
 
 // Joi schema for updating a wallpaper (Partial Validation)
+
 
 
