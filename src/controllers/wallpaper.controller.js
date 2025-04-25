@@ -145,7 +145,6 @@ exports.addWallpaperToFavourite = async (req, res) => {
 exports.updateWallpaper = async (req, res) => {
   try {
     let { wallpaperId, title } = req.body
-    console.log(wallpaperId)
     title = capitalizeFirst(title.trim())
     wallpaperId = upperCase(wallpaperId.trim())
 
