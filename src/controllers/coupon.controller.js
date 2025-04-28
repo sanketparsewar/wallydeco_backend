@@ -1,6 +1,6 @@
 const Coupon = require('../models/coupon')
 const UsedCoupon = require("../models/usedCoupon");
-const { capitalizeFirst, upperCase } = require('../utils/stringTransform')
+const { upperCase } = require('../utils/stringTransform')
 
 
 exports.createCoupon = async (req, res) => {
@@ -56,7 +56,6 @@ exports.getCoupons = async (req, res) => {
     // Wait for all update operations to complete
     await Promise.all(updates);
 
-    // Fetch the coupons again after update and sort by isActive and createdAt
     const updatedCoupons = await Coupon.find().sort({ isActive: -1, createdAt: -1 });
 
     // Send the updated coupons
